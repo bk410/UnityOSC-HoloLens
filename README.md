@@ -1,3 +1,9 @@
+
+## This version support HoloLens(UWP) forked from UnityOSC v1.2.
+
+by littilewing
+
+
 ## UnityOSC v1.2.
 
 Open Sound Control classes and API for the Unity 3d game engine
