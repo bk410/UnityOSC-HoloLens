@@ -144,7 +144,9 @@ namespace UnityOSC
 						break;
 
 					default:
+					#if !NETFX_CORE
 						Console.WriteLine("Unknown tag: " + tag);
+					#endif
 						continue;
 				}
 
@@ -165,43 +167,47 @@ namespace UnityOSC
 		/// <param name="value">
 		/// A <see cref="T"/>
 		/// </param>
-		public override void Append<T> (T value)
+		//@see https://github.com/jorgegarcia/UnityOSC/issues/8
+		//changed by littlewing
+
+		public override void Append<T>(T value)
 		{
-			Type type = value.GetType();
 			char typeTag = DEFAULT;
-
-			switch (type.Name)
+			
+			if (value is int)
 			{
-				case "Int32":
-					typeTag = INTEGER;
-					break;
-
-				case "Int64":
-					typeTag = LONG;
-					break;
-
-				case "Single":
-					typeTag = FLOAT;
-					break;
-
-				case "Double":
-					typeTag = DOUBLE;
-					break;
-
-				case "String":
-					typeTag = STRING;
-					break;
-
-				case "Byte[]":
-					typeTag = BYTE;
-					break;
-
-				default:
-					throw new Exception("Unsupported data type.");
+				typeTag = INTEGER;
 			}
-
+			else if (value is long)
+			{
+				typeTag = LONG;
+			}
+			else if (value is float)
+			{
+				typeTag = FLOAT;
+			}
+			else if (value is double)
+			{
+				typeTag = DOUBLE;
+			}
+			else if (value is string)
+			{
+				typeTag = STRING;
+			}
+			else if (value is byte[])
+			{ 
+				typeTag = BYTE;
+			}
+			else
+			{ 
+				throw new Exception("Unsupported data type.");
+			}
+			
 			_typeTag += typeTag;
 			_data.Add(value);
+
+
+
 		}
 		#endregion
 	}

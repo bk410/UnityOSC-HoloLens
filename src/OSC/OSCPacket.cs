@@ -46,7 +46,9 @@ namespace UnityOSC
 			}
 			set
 			{
+				#if !NETFX_CORE
 				Trace.Assert(string.IsNullOrEmpty(_address) == false);
+				#endif
 				_address = value;
 			}
 		}
@@ -122,48 +124,49 @@ namespace UnityOSC
 		/// <returns>
 		/// A <see cref="System.Byte[]"/>
 		/// </returns>
+		//@see https://github.com/jorgegarcia/UnityOSC/issues/8
+		//changed by littlewing
+
 		protected static byte[] PackValue<T>(T value)
 		{
 			object valueObject = value;
-			Type type = value.GetType();
 			byte[] data = null;
-
-			switch (type.Name)
+			
+			if (value is int)
 			{
-				case "Int32":
-					data = BitConverter.GetBytes((int)valueObject);
-					if (BitConverter.IsLittleEndian) data = SwapEndian(data);
-					break;
-
-				case "Int64":
-					data = BitConverter.GetBytes((long)valueObject);
-					if (BitConverter.IsLittleEndian) data = SwapEndian(data);
-					break;
-
-				case "Single":
-					data = BitConverter.GetBytes((float)valueObject);
-					if (BitConverter.IsLittleEndian) data = SwapEndian(data);
-					break;
-
-				case "Double":
-					data = BitConverter.GetBytes((double)valueObject);
-					if (BitConverter.IsLittleEndian) data = SwapEndian(data);
-					break;
-
-				case "String":
-					data = Encoding.ASCII.GetBytes((string)valueObject);
-					break;
-
-				case "Byte[]":
-					byte[] valueData = ((byte[])valueObject);
-					List<byte> bytes = new List<byte>();
-					bytes.AddRange(PackValue(valueData.Length));
-					bytes.AddRange(valueData);
-					data = bytes.ToArray();
-					break;
-
-				default:
-					throw new Exception("Unsupported data type.");
+				data = BitConverter.GetBytes((int)valueObject);
+				if (BitConverter.IsLittleEndian) data = SwapEndian(data);
+			}
+			else if (value is long)
+			{
+				data = BitConverter.GetBytes((long)valueObject);
+				if (BitConverter.IsLittleEndian) data = SwapEndian(data);
+			}
+			else if (value is float)
+			{
+				data = BitConverter.GetBytes((float)valueObject);
+				if (BitConverter.IsLittleEndian) data = SwapEndian(data);
+			}
+			else if (value is double)
+			{
+				data = BitConverter.GetBytes((double)valueObject);
+				if (BitConverter.IsLittleEndian) data = SwapEndian(data);
+			}
+			else if (value is string)
+			{
+				data = Encoding.ASCII.GetBytes((string)valueObject);
+			}
+			else if (value is byte[])
+			{
+				byte[] valueData = ((byte[])valueObject);
+				List<byte> bytes = new List<byte>();
+				bytes.AddRange(PackValue(valueData.Length));
+				bytes.AddRange(valueData);
+				data = bytes.ToArray();
+			}
+			else
+			{
+				throw new Exception("Unsupported data type.");
 			}
 			return data;
 		}

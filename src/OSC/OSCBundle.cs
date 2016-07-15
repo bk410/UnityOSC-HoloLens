@@ -89,7 +89,10 @@ namespace UnityOSC
 		public new static OSCBundle Unpack(byte[] data, ref int start, int end)
 		{
 			string address = OSCPacket.UnpackValue<string>(data, ref start);
+			
+			#if !NETFX_CORE
 			Trace.Assert(address == BUNDLE);
+			#endif
 			
 			long timeStamp = OSCPacket.UnpackValue<long>(data, ref start);
 			OSCBundle bundle = new OSCBundle(timeStamp);
@@ -112,7 +115,9 @@ namespace UnityOSC
 		/// </param>
 		public override void Append<T> (T msgvalue)
 		{
+			#if !NETFX_CORE
 			Trace.Assert(msgvalue is OSCMessage);
+			#endif
 			_data.Add(msgvalue);
 		}
 		#endregion			
