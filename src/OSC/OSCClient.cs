@@ -18,9 +18,22 @@
 // 	  IN THE SOFTWARE.
 //
 
+
 using System;
 using System.Net;
+using UnityEngine;
+
+
+
+#if NETFX_CORE
+using Windows.Networking;
+using Windows.Networking.Sockets;
+using Windows.Storage.Streams;
+#else
 using System.Net.Sockets;
+#endif
+
+
 
 namespace UnityOSC
 {
@@ -30,30 +43,36 @@ namespace UnityOSC
 	
 	public class OSCClient
 	{
-		#region Constructors
+
+
+#region Constructors
 		public OSCClient (IPAddress address, int port)
 		{
 			_ipAddress = address;
 			_port = port;
 			Connect();
 		}
-		#endregion
+#endregion
 		
-		#region Member Variables
+#region Member Variables
 		private IPAddress _ipAddress;
 		private int _port;
+
+
+#if NETFX_CORE
+		DatagramSocket socket;
+		//DataWriter writer;
+		HostName _hostname;
+#else
 		private UdpClient _udpClient;
-		#endregion
+#endif
+
+		private string msg;
+#endregion
 		
-		#region Properties
-		public IPAddress ClientIPAddress
-		{
-			get
-			{
-				return _ipAddress;
-			}
-		}
-		
+
+
+
 		public int Port
 		{
 			get
@@ -61,9 +80,63 @@ namespace UnityOSC
 				return _port;
 			}
 		}
-		#endregion
+
 	
-		#region Methods
+#region Methods
+
+
+		// use this for initialization
+#if NETFX_CORE
+		 void Connect()
+		{
+
+			Debug.Log("OSCClient Connect start...");
+			_hostname = new HostName(_ipAddress.ToString());
+			socket = new DatagramSocket();
+
+			Debug.Log("exit start:"+_ipAddress.ToString());
+
+		}
+
+		public void Close()
+		{
+
+			socket.Dispose();
+			Debug.Log("OSC CLIENT UWP CLOSE");
+		}
+
+		public async void Send(OSCPacket packet)
+		{
+			byte[] data = packet.BinaryData;
+			//Debug.Log("OSCCLIENT-SEND:" + System.Text.Encoding.ASCII.GetString(data));
+
+			using (var writer = new DataWriter(await socket.GetOutputStreamAsync(_hostname, _port.ToString()))){
+				try 
+				{
+					writer.WriteBytes(data);
+					await writer.StoreAsync();
+
+				}
+				catch
+				{
+					throw new Exception(String.Format("Can't send OSC packet to client {0} : {1}:Length{2}", _ipAddress, _port,data.Length));
+				}
+
+
+			}
+
+		}
+
+
+
+#else
+		public IPAddress ClientIPAddress
+		{
+			get
+			{
+				return _ipAddress;
+			}
+		}
 		/// <summary>
 		/// Connects the client to a given remote address and port.
 		/// </summary>
@@ -89,7 +162,7 @@ namespace UnityOSC
 			_udpClient.Close();
 			_udpClient = null;
 		}
-		
+
 		/// <summary>
 		/// Sends an OSC packet to the defined destination and address of the client.
 		/// </summary>
@@ -108,7 +181,8 @@ namespace UnityOSC
 				throw new Exception(String.Format("Can't send OSC packet to client {0} : {1}", _ipAddress, _port));
 			}
 		}
-		#endregion
+#endif
+#endregion
 	}
 }
 
