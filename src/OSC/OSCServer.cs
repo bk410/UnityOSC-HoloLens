@@ -35,27 +35,27 @@ using System.Threading;
 
 namespace UnityOSC
 {
-    public delegate void PacketReceivedEventHandler(OSCServer sender, OSCPacket packet);
+	public delegate void PacketReceivedEventHandler(OSCServer sender, OSCPacket packet);
 
 	/// <summary>
 	/// Receives incoming OSC messages
 	/// </summary>
 	public class OSCServer
-    {
-        #region Delegates
-        public event PacketReceivedEventHandler PacketReceivedEvent;
-        #endregion
+	{
+		#region Delegates
+		public event PacketReceivedEventHandler PacketReceivedEvent;
+		#endregion
 
-        #region Constructors
-        public OSCServer (int localPort)
+		#region Constructors
+		public OSCServer (int localPort)
 		{
-            PacketReceivedEvent += delegate(OSCServer s, OSCPacket p) { };
+			PacketReceivedEvent += delegate(OSCServer s, OSCPacket p) { };
 
 			_localPort = localPort;
 			Connect();
 		}
 		#endregion
-		
+
 		#region Member Variables
 
 		#if NETFX_CORE
@@ -69,12 +69,12 @@ namespace UnityOSC
 		private int _localPort;
 		private OSCPacket _lastReceivedPacket;
 
-		private string msg;
+
 		#endregion
-		
+
 		#region Properties
 
-		
+
 		public int LocalPort
 		{
 			get
@@ -86,7 +86,7 @@ namespace UnityOSC
 				_localPort = value;
 			}
 		}
-		
+
 		public OSCPacket LastReceivedPacket
 		{
 			get
@@ -95,7 +95,7 @@ namespace UnityOSC
 			}
 		}
 		#endregion
-	
+
 		#region Methods
 
 
@@ -104,48 +104,56 @@ namespace UnityOSC
 		{
 
 			Debug.Log("Waiting for a connection...");
-			msg = "start";
-			socket = new DatagramSocket();
+			socket =  new DatagramSocket();
 			socket.MessageReceived += Socket_MessageReceived;
+
 
 			try
 			{
 				await socket.BindEndpointAsync(null, _localPort.ToString());
+
 			}
 			catch (Exception e)
 			{
-			Debug.Log(e.ToString());
-			Debug.Log(SocketError.GetStatus(e.HResult).ToString());
-			//msg = e.ToString();
-			return;
+				Debug.Log(e.ToString());
+				Debug.Log(SocketError.GetStatus(e.HResult).ToString());
+				return;
 			}
-			Debug.Log("exit start");
+
 		}
 
 		public void Close()
 		{
-
 			socket.Dispose();
-			Debug.Log("OSCSERVER UWP CLOSE");
+
 		}
+
 		private async void Socket_MessageReceived(Windows.Networking.Sockets.DatagramSocket sender,
 		Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs args)
 		{
+
+
+			// lock multi event 
+			socket.MessageReceived -= Socket_MessageReceived;
+
+			//Debug.Log("OSCSERVER UWP  Socket_MessageReceived");
+
 			//Read the message that was received from the UDP echo client.
 			Stream streamIn = args.GetDataStream().AsStreamForRead();
 
 			StreamReader reader = new StreamReader(streamIn);
 			byte[] bytes = reader.CurrentEncoding.GetBytes(reader.ReadToEnd());
-			
-	
-			OSCPacket packet = OSCPacket.Unpack(bytes);
 
+			streamIn.Dispose();
+			reader.Dispose();
+
+			OSCPacket packet = OSCPacket.Unpack(bytes);
 			_lastReceivedPacket = packet;
 
 			PacketReceivedEvent(this, _lastReceivedPacket);	
 
-
-
+			// unlock multi event 
+			socket.MessageReceived += Socket_MessageReceived;
 		}
 		#else
 		public UdpClient UDPClient
@@ -165,7 +173,7 @@ namespace UnityOSC
 		public void Connect()
 		{
 			if(this._udpClient != null) Close();
-			
+
 			try
 			{
 				_udpClient = new UdpClient(_localPort);
@@ -190,39 +198,36 @@ namespace UnityOSC
 			_udpClient.Close();
 			_udpClient = null;
 		}
-		
+
 
 		/// <summary>
 		/// Receives and unpacks an OSC packet.
-        /// A <see cref="OSCPacket"/>
+		/// A <see cref="OSCPacket"/>
 		/// </summary>
 		private void Receive()
 		{
 			IPEndPoint ip = null;
-			
+
 			try
 			{
 				byte[] bytes = _udpClient.Receive(ref ip);
 
 				if(bytes != null && bytes.Length > 0)
 				{
-					msg = System.Text.Encoding.ASCII.GetString(bytes);//bytes.
-					msg = "MAG:"  + "/!!!" + bytes.Length;
-					Debug.Log(msg);
-                    OSCPacket packet = OSCPacket.Unpack(bytes);
+					OSCPacket packet = OSCPacket.Unpack(bytes);
 
-                    _lastReceivedPacket = packet;
+					_lastReceivedPacket = packet;
 
-                    PacketReceivedEvent(this, _lastReceivedPacket);	
+					PacketReceivedEvent(this, _lastReceivedPacket);	
 
 
 				}
 			}
 			catch{
 				throw new Exception(String.Format("Can't create server at port {0}", _localPort));
-  			}
+			}
 		}
-	
+
 
 
 		/// <summary>
@@ -233,7 +238,7 @@ namespace UnityOSC
 			while( true )
 			{
 				Receive();
-                Thread.Sleep(10);
+				Thread.Sleep(10);
 			}
 		}
 		#endif
