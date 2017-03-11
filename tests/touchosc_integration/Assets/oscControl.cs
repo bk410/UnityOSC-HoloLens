@@ -26,16 +26,24 @@ using System.Text;
 using UnityOSC;
 
 public class oscControl : MonoBehaviour {
-	
-	private Dictionary<string, ServerLog> servers;
+
+    public string TargetAddr;
+    public int OutGoingPort;
+    public int InComingPort;
+
+
+    private Dictionary<string, ServerLog> servers;
 	private Dictionary<string, ClientLog> clients;
 	private float randVal=0f;
 	public GameObject cube;
 	private String msg="";
-	// Script initialization
-	void Start() {	
-		OSCHandler.Instance.Init(); //init OSC
-		servers = new Dictionary<string, ServerLog>();
+
+
+    // Script initialization
+    void Start() {
+        //OSCHandler.Instance.Init(); //init OSC
+        OSCHandler.Instance.Init("iPhone", TargetAddr, OutGoingPort,InComingPort);
+        servers = new Dictionary<string, ServerLog>();
 		clients = new Dictionary<string,ClientLog> ();
 		cube = GameObject.Find ("Cube");
 	}
@@ -67,7 +75,7 @@ public class oscControl : MonoBehaviour {
 			if (item.Value.log.Count > 0) {
 				int lastPacketIndex = item.Value.packets.Count - 1;
 					
-				UnityEngine.Debug.Log (String.Format ("SERVER: {0} ADDRESS: {1} VALUE : {2}", 
+				UnityEngine.Debug.Log (String.Format ("RECIVE: {0} ADDRESS: {1} VALUE : {2}", 
 					                                    item.Key, // Server name
 					                                    item.Value.packets [lastPacketIndex].Address, // OSC address
 					                                    item.Value.packets [lastPacketIndex].Data [0].ToString ())); //First data value
@@ -87,7 +95,7 @@ public class oscControl : MonoBehaviour {
 			{
 				int lastMessageIndex = item.Value.messages.Count- 1;
 				
-				UnityEngine.Debug.Log(String.Format("CLIENT: {0} ADDRESS: {1} VALUE 0: {2}", 
+				UnityEngine.Debug.Log(String.Format("SEND: {0} ADDRESS: {1} VALUE 0: {2}", 
 				                                    item.Key, // Server name
 				                                    item.Value.messages[lastMessageIndex].Address, // OSC address
 				                                    item.Value.messages[lastMessageIndex].Data[0].ToString())); //First data value
