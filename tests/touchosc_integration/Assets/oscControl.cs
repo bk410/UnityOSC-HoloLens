@@ -42,7 +42,7 @@ public class oscControl : MonoBehaviour {
     // Script initialization
     void Start() {
         //OSCHandler.Instance.Init(); //init OSC
-        OSCHandler.Instance.Init("iPhone", TargetAddr, OutGoingPort,InComingPort);
+        OSCHandler.Instance.Init("TouchOSC Bridge", TargetAddr, OutGoingPort,InComingPort);
         servers = new Dictionary<string, ServerLog>();
 		clients = new Dictionary<string,ClientLog> ();
 		cube = GameObject.Find ("Cube");

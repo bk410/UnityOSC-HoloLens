@@ -18,12 +18,9 @@
 // 	  IN THE SOFTWARE.
 //
 
-
 using System;
 using System.Net;
 using UnityEngine;
-
-
 
 #if NETFX_CORE
 using Windows.Networking;
@@ -43,36 +40,35 @@ namespace UnityOSC
 	
 	public class OSCClient
 	{
-
-
-#region Constructors
+		#region Constructors
 		public OSCClient (IPAddress address, int port)
 		{
 			_ipAddress = address;
 			_port = port;
 			Connect();
 		}
-#endregion
+		#endregion
 		
-#region Member Variables
+		#region Member Variables
 		private IPAddress _ipAddress;
 		private int _port;
-
-
 #if NETFX_CORE
-		DatagramSocket socket;
-		//DataWriter writer;
+		DatagramSocket socket;		
 		HostName _hostname;
 #else
 		private UdpClient _udpClient;
 #endif
-
-		private string msg;
-#endregion
+		#endregion
 		
-
-
-
+		#region Properties
+		public IPAddress ClientIPAddress
+		{
+			get
+			{
+				return _ipAddress;
+			}
+		}
+		
 		public int Port
 		{
 			get
@@ -80,31 +76,55 @@ namespace UnityOSC
 				return _port;
 			}
 		}
-
+		#endregion
 	
-#region Methods
-
-
-		// use this for initialization
-#if NETFX_CORE
-		 void Connect()
+		#region Methods
+		/// <summary>
+		/// Connects the client to a given remote address and port.
+		/// </summary>
+		public void Connect()
 		{
-
+#if NETFX_CORE
 			Debug.Log("OSCClient Connect start...");
 			_hostname = new HostName(_ipAddress.ToString());
 			socket = new DatagramSocket();
 
 			Debug.Log("exit start:"+_ipAddress.ToString());
-
+#else
+			if(_udpClient != null) Close();
+			_udpClient = new UdpClient();
+			try
+			{
+				_udpClient.Connect(_ipAddress, _port);	
+			}
+			catch
+			{
+				throw new Exception(String.Format("Can't create client at IP address {0} and port {1}.", _ipAddress,_port));
+			}
+#endif		
 		}
-
+		
+		/// <summary>
+		/// Closes the client.
+		/// </summary>
 		public void Close()
 		{
-
+#if NETFX_CORE
 			socket.Dispose();
 			Debug.Log("OSC CLIENT UWP CLOSE");
+#else
+			_udpClient.Close();
+			_udpClient = null;
+#endif
 		}
-
+		
+		/// <summary>
+		/// Sends an OSC packet to the defined destination and address of the client.
+		/// </summary>
+		/// <param name="packet">
+		/// A <see cref="OSCPacket"/>
+		/// </param>
+#if NETFX_CORE
 		public async void Send(OSCPacket packet)
 		{
 			byte[] data = packet.BinaryData;
@@ -126,49 +146,7 @@ namespace UnityOSC
 			}
 
 		}
-
-
-
 #else
-		public IPAddress ClientIPAddress
-		{
-			get
-			{
-				return _ipAddress;
-			}
-		}
-		/// <summary>
-		/// Connects the client to a given remote address and port.
-		/// </summary>
-		public void Connect()
-		{
-			if(_udpClient != null) Close();
-			_udpClient = new UdpClient();
-			try
-			{
-				_udpClient.Connect(_ipAddress, _port);	
-			}
-			catch
-			{
-				throw new Exception(String.Format("Can't create client at IP address {0} and port {1}.", _ipAddress,_port));
-			}
-		}
-		
-		/// <summary>
-		/// Closes the client.
-		/// </summary>
-		public void Close()
-		{
-			_udpClient.Close();
-			_udpClient = null;
-		}
-
-		/// <summary>
-		/// Sends an OSC packet to the defined destination and address of the client.
-		/// </summary>
-		/// <param name="packet">
-		/// A <see cref="OSCPacket"/>
-		/// </param>
 		public void Send(OSCPacket packet)
 		{
 			byte[] data = packet.BinaryData;
@@ -182,7 +160,7 @@ namespace UnityOSC
 			}
 		}
 #endif
-#endregion
+		#endregion
 	}
 }
 

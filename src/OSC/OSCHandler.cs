@@ -90,19 +90,6 @@ public class OSCHandler : MonoBehaviour
 	/// Here you can create the OSC servers and clientes.
 	/// </summary>
 	///  
-	 /*
-	public void Init()
-	{
-        //Initialize OSC clients (transmitters)
-        //Example:		
-        //CreateClient("SuperCollider", IPAddress.Parse("127.0.0.1"), 5555);
-
-        //Initialize OSC servers (listeners)
-        //Example:
-
-        //CreateServer("AndroidPhone", 6666);
-	}
-*/
 	public void Init(string id,string targetAddr, int outGoingPort, int inComingPort)
 	{
 		//Initialize OSC clients (transmitters)
@@ -113,7 +100,7 @@ public class OSCHandler : MonoBehaviour
 		//Initialize OSC servers (listeners)
 		// Receiver
 		if(inComingPort != null  && inComingPort != 0)
-			CreateServer(id, inComingPort);        
+			CreateServer(id, inComingPort);
 	}
 
 	#region Properties
@@ -140,7 +127,7 @@ public class OSCHandler : MonoBehaviour
 	/// Ensure that the instance is destroyed when the game is stopped in the Unity editor
 	/// Close all the OSC clients and servers
 	/// </summary>
-	public void OnApplicationQuit() 
+	void OnApplicationQuit() 
 	{
 		foreach(KeyValuePair<string,ClientLog> pair in _clients)
 		{

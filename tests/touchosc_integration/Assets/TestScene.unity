@@ -266,7 +266,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4868cdbbe832cec469001ea5e37cbda0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetAddr: 192.168.24.54
+  TargetAddr: 192.168.24.10
   OutGoingPort: 6665
   InComingPort: 6666
   cube: {fileID: 0}

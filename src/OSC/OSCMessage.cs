@@ -169,6 +169,7 @@ namespace UnityOSC
 		/// </param>
 		//@see https://github.com/jorgegarcia/UnityOSC/issues/8
 		//changed by littlewing
+		//addaptive for iOS
 
 		public override void Append<T>(T value)
 		{
