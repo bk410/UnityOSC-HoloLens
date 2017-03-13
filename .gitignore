@@ -84,6 +84,7 @@ $RECYCLE.BIN/
 *.swp
 tests/touchosc_integration/Assets/Editor*
 tests/touchosc_integration/Assets/OSC*
+tests/touchosc_integration/Library
 tests/touchosc_integration/Temp
 tests/touchosc_integration/UWP
 tests/touchosc_integration/App
