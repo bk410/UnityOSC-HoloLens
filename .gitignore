@@ -82,8 +82,8 @@ $RECYCLE.BIN/
 
 #mywork
 *.swp
-tests/touchosc_integration/Assets/Editor*
-tests/touchosc_integration/Assets/OSC*
+tests/touchosc_integration/Assets/Editor/
+tests/touchosc_integration/Assets/OSC/
 tests/touchosc_integration/[Ll]ibrary*
 tests/touchosc_integration/Temp
 tests/touchosc_integration/UWP
