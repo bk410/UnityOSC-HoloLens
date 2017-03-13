@@ -68,22 +68,38 @@ public class oscControl : MonoBehaviour {
 			OSCHandler.Instance.SendMessageToClient ("TouchOSC Bridge", "/1/fader4", randVal);
 		}
 		OSCHandler.Instance.UpdateLogs();
-
+        
 		foreach (KeyValuePair<string, ServerLog> item in servers) {
 			// If we have received at least one packet,
 			// show the last received from the log in the Debug console
 			if (item.Value.log.Count > 0) {
 				int lastPacketIndex = item.Value.packets.Count - 1;
-					
-				UnityEngine.Debug.Log (String.Format ("RECIVE: {0} ADDRESS: {1} VALUE : {2}", 
-					                                    item.Key, // Server name
-					                                    item.Value.packets [lastPacketIndex].Address, // OSC address
-					                                    item.Value.packets [lastPacketIndex].Data [0].ToString ())); //First data value
-					
-				//converts the values into MIDI to scale the cube
-				float tempVal = float.Parse (item.Value.packets [lastPacketIndex].Data [0].ToString ());
-				cube.transform.localScale = new Vector3 (tempVal, tempVal, tempVal);
-			}
+
+                UnityEngine.Debug.Log(String.Format("RECIVE: {0} ADDRESS: {1} VALUE : {2}",
+                                                        item.Key, // Server name
+                                                        item.Value.packets[lastPacketIndex].Address, // OSC address
+                                                        (item.Value.packets[lastPacketIndex].Data.Count > 0  ? item.Value.packets[lastPacketIndex].Data[0].ToString() : "null") 
+                                                        )                                                     
+                                                        ); //First data value
+
+                //converts the values into MIDI to scale the cube
+                
+                if (item.Value.packets[lastPacketIndex].Data.Count > 1)
+                {
+                    
+                    try
+                    {
+                        float tempVal = float.Parse(item.Value.packets[lastPacketIndex].Data[0].ToString());
+                        cube.transform.localScale = new Vector3(tempVal, tempVal, tempVal);
+                    }
+                    catch
+                    {
+                        Debug.Log("value of " + item.Value.packets[lastPacketIndex].Address + " is not float value");
+                    }
+
+                }
+
+            }
 		}
 			
 
